@@ -9,6 +9,10 @@ export default defineConfig({
       'trace': resolve(__dirname, '../../dist')
     }
   },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true
+  },
   server: {
     port: 3000,
     open: true
