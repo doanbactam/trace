@@ -1,0 +1,10 @@
+node_modules
+dist
+*.log
+.DS_Store
+.env
+.env.local
+
+# Lock files (optional - uncomment if you don't want to commit them)
+# bun.lock
+# package-lock.json

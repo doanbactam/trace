@@ -1,0 +1,52 @@
+{
+  "name": "trace",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Git history visualizer for the AI coding era",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./highlight": {
+      "types": "./dist/highlight/index.d.ts",
+      "import": "./dist/highlight/index.js",
+      "require": "./dist/highlight/index.cjs"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js",
+      "require": "./dist/config.cjs"
+    }
+  },
+  "bin": {
+    "trace": "./dist/cli/index.js"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^12.0.1",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.6",
+    "bunchee": "^5.5.0",
+    "react": "^19.0.0",
+    "size-limit": "^11.1.6",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "bunchee && (cd cli && bunchee index.ts -o ../dist/cli/index.js -f esm --runtime node --external react)",
+    "dev": "bunchee --watch",
+    "size": "size-limit",
+    "typecheck": "tsc --noEmit"
+  },
+  "size-limit": [
+    {
+      "path": "dist/index.js",
+      "limit": "3.1 KB",
+      "gzip": true,
+      "ignore": ["dist/config.js"]
+    }
+  ]
+}
