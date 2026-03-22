@@ -21,6 +21,10 @@ import { Trace } from 'trace'
 | `interval` | `number` | `2000` | Ms between commits |
 | `onCommit` | `(commit) => void` | — | Callback on commit change |
 | `className` | `string` | — | CSS class for root element |
+| `theme` | `Theme` | `'dark'` | Color theme |
+| `filterable` | `boolean` | `false` | Enable filter/search UI |
+| `defaultFilter` | `FilterOptions` | `{}` | Initial filter state |
+| `onFilterChange` | `(filter) => void` | — | Callback when filter changes |
 
 ## Commit Type
 
@@ -38,6 +42,42 @@ type DiffLine = {
   type: 'add' | 'remove' | 'ctx'
   content: string
 }
+```
+
+## Filtering
+
+Enable the filter UI with `filterable={true}`:
+
+```tsx
+import { Trace } from 'trace'
+
+<Trace
+  commits={commits}
+  filterable={true}
+  onFilterChange={(filter) => console.log(filter)}
+/>
+```
+
+**FilterOptions:**
+```ts
+type FilterOptions = {
+  search?: string          // Search in message, author, hash
+  authorType?: 'all' | 'human' | 'ai'
+  dateFrom?: string        // ISO date string (future)
+  dateTo?: string          // ISO date string (future)
+}
+```
+
+**Programmatic filtering:**
+```tsx
+const [filter, setFilter] = useState({ authorType: 'ai' })
+
+<Trace
+  commits={commits}
+  filterable={true}
+  defaultFilter={filter}
+  onFilterChange={setFilter}
+/>
 ```
 
 ## CLI
@@ -78,33 +118,6 @@ Create `.tracerc` in project root or `~/.tracerc`:
     "ttl": 86400000
   }
 }
-```
-
-## Theming
-
-Override CSS variables:
-
-```css
-:root {
-  --trace-bg: #09090b;
-  --trace-human: #22c55e;
-  --trace-ai: #a855f7;
-  --trace-font-code: 'JetBrains Mono', monospace;
-}
-```
-
-## Deploy Demo Site
-
-```bash
-# Using Vercel CLI
-npm install -g vercel
-vercel
-
-# Or via Vercel Dashboard
-# 1. Push to GitHub
-# 2. Import at vercel.com/new
-# 3. Root Directory: site
-# 4. Output Directory: .
 ```
 
 ## Syntax Highlighting (Optional)
