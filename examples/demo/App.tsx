@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Trace } from 'trace'
+import { Trace } from 'git-trace'
 import { commits } from './mockData'
-import type { Theme, FilterOptions } from 'trace'
+import type { Theme, FilterOptions } from 'git-trace'
 
 const THEMES: { value: Theme; label: string }[] = [
   { value: 'dark', label: 'Dark' },

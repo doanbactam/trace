@@ -1,4 +1,4 @@
-# trace
+# git-trace
 <img width="1828" height="1350" alt="image" src="https://github.com/user-attachments/assets/12ff8e4e-6360-446a-9ad6-80b9efed700e" />
 
 
@@ -7,7 +7,7 @@ Git history visualizer for the AI coding era.
 ## Quick Start
 
 ```tsx
-import { Trace } from 'trace'
+import { Trace } from 'git-trace'
 
 <Trace commits={commits} autoPlay interval={2000} />
 ```
@@ -49,7 +49,7 @@ type DiffLine = {
 Enable the filter UI with `filterable={true}`:
 
 ```tsx
-import { Trace } from 'trace'
+import { Trace } from 'git-trace'
 
 <Trace
   commits={commits}
@@ -84,17 +84,17 @@ const [filter, setFilter] = useState({ authorType: 'ai' })
 
 ```bash
 # Local git history to JSON
-npx trace src/App.tsx --last 8 --json > commits.json
+npx git-trace src/App.tsx --last 8 --json > commits.json
 
 # Standalone HTML
-npx trace src/App.tsx --last 8 --output embed.html
+npx git-trace src/App.tsx --last 8 --output embed.html
 
 # Fetch from GitHub (cached 24h)
-npx trace owner/repo src/path.ts --token $GITHUB_TOKEN
+npx git-trace owner/repo src/path.ts --token $GITHUB_TOKEN
 
 # Cache management
-npx trace cache           # Show cache info
-npx trace cache clear     # Clear cache
+npx git-trace cache           # Show cache info
+npx git-trace cache clear     # Clear cache
 ```
 
 ## Configuration
@@ -124,11 +124,11 @@ Create `.tracerc` in project root or `~/.tracerc`:
 
 ```tsx
 // Core: ~3.6KB gzipped
-import { Trace } from 'trace'
+import { Trace } from 'git-trace'
 
 // With syntax highlighting: +6KB
-import { Trace } from 'trace'
-import 'trace/highlight'
+import { Trace } from 'git-trace'
+import 'git-trace/highlight'
 ```
 
 ## License

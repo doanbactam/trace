@@ -1,5 +1,5 @@
 {
-  "name": "trace",
+  "name": "git-trace",
   "version": "0.1.0",
   "type": "module",
   "description": "Git history visualizer for the AI coding era",
