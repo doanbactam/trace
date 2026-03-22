@@ -1,4 +1,8 @@
 # git-trace
+
+[![npm version](https://badge.fury.io/js/git-trace.svg)](https://www.npmjs.com/package/git-trace)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 <img width="1828" height="1350" alt="image" src="https://github.com/user-attachments/assets/12ff8e4e-6360-446a-9ad6-80b9efed700e" />
 
 
