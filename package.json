@@ -43,6 +43,7 @@
     "dev": "bunchee --watch",
     "demo": "vite examples/demo",
     "demo:build": "vite build examples/demo",
+    "build:demo": "bun run build && vite build examples/demo",
     "size": "size-limit",
     "typecheck": "tsc --noEmit"
   },
