@@ -1,7 +1,7 @@
 // Git history visualizer component — renders commit timeline with diff view
 
-import { useState, useEffect, useRef, useCallback, memo } from 'react'
-import type { TraceProps, Commit, DiffLine } from './types'
+import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react'
+import type { TraceProps, Commit, DiffLine, FilterOptions, AuthorTypeFilter } from './types'
 import { escapeHtml } from './shared'
 import { themes, themeToVars } from './themes'
 
@@ -225,6 +225,83 @@ const styles = `
   height: 400px;
   color: var(--trace-dim);
 }
+.trace-filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--trace-border-subtle);
+  align-items: center;
+  background: var(--trace-bg);
+  flex-wrap: wrap;
+}
+.trace-filter-input {
+  flex: 1;
+  min-width: 140px;
+  background: transparent;
+  border: 1px solid var(--trace-border);
+  color: var(--trace-fg);
+  padding: 6px 10px;
+  border-radius: var(--trace-radius);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.12s ease;
+}
+.trace-filter-input:focus {
+  border-color: var(--trace-dim);
+}
+.trace-filter-input::placeholder {
+  color: var(--trace-dim);
+}
+.trace-filter-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.trace-filter-btn {
+  background: transparent;
+  border: 1px solid var(--trace-border);
+  color: var(--trace-dim);
+  padding: 4px 10px;
+  border-radius: var(--trace-radius);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  font-family: inherit;
+}
+.trace-filter-btn:hover {
+  color: var(--trace-fg);
+  border-color: var(--trace-dim);
+}
+.trace-filter-btn.active {
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--trace-ai);
+  border-color: var(--trace-ai);
+}
+.trace-filter-btn.active[data-filter="human"] {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--trace-human);
+  border-color: var(--trace-human);
+}
+.trace-filter-clear {
+  background: transparent;
+  border: none;
+  color: var(--trace-dim);
+  padding: 4px 8px;
+  border-radius: var(--trace-radius);
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 0.12s ease;
+  font-family: inherit;
+}
+.trace-filter-clear:hover {
+  color: var(--trace-fg);
+}
+.trace-filter-stats {
+  font-size: 11px;
+  color: var(--trace-dim);
+  margin-left: auto;
+}
 `
 
 // Line prefix lookup - constant outside render
@@ -235,6 +312,74 @@ const LINE_PREFIX: Record<string, string> = {
 }
 
 const STYLE_ID = 'trace-styles'
+
+// Filter bar component with search and filters
+const FilterBar = memo(function FilterBar({
+  filter,
+  onFilterChange,
+  totalCount,
+  filteredCount
+}: {
+  filter: FilterOptions
+  onFilterChange: (f: FilterOptions) => void
+  totalCount: number
+  filteredCount: number
+}) {
+  const authorType = filter.authorType ?? 'all'
+
+  const setAuthorType = (type: AuthorTypeFilter) => {
+    onFilterChange({ ...filter, authorType: type === authorType ? 'all' : type })
+  }
+
+  const setSearch = (search: string) => {
+    onFilterChange({ ...filter, search: search || undefined })
+  }
+
+  const clearFilter = () => {
+    onFilterChange({})
+  }
+
+  const hasActiveFilter = filter.search || filter.authorType && filter.authorType !== 'all'
+
+  return (
+    <div className="trace-filter-bar">
+      <input
+        type="text"
+        className="trace-filter-input"
+        placeholder="Search commits..."
+        value={filter.search ?? ''}
+        onChange={(e) => setSearch(e.target.value)}
+        aria-label="Search commits"
+      />
+      <div className="trace-filter-group">
+        <button
+          className={`trace-filter-btn ${authorType === 'ai' ? 'active' : ''}`}
+          data-filter="ai"
+          onClick={() => setAuthorType('ai')}
+          aria-label="Filter by AI commits"
+        >
+          AI
+        </button>
+        <button
+          className={`trace-filter-btn ${authorType === 'human' ? 'active' : ''}`}
+          data-filter="human"
+          onClick={() => setAuthorType('human')}
+          aria-label="Filter by Human commits"
+        >
+          Human
+        </button>
+      </div>
+      {hasActiveFilter && (
+        <button className="trace-filter-clear" onClick={clearFilter} aria-label="Clear filters">
+          clear
+        </button>
+      )}
+      <span className="trace-filter-stats">
+        {filteredCount} / {totalCount}
+      </span>
+    </div>
+  )
+})
 
 // Memoized line component - only re-renders when line content changes
 const DiffLine = memo(function DiffLine({
@@ -341,14 +486,46 @@ export function Trace({
   interval = 2000,
   onCommit,
   className = '',
-  theme = 'dark'
+  theme = 'dark',
+  filterable = false,
+  defaultFilter = {},
+  onFilterChange
 }: TraceProps) {
   const themeVars = themeToVars(themes[theme])
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(autoPlay)
+  const [filter, setFilter] = useState<FilterOptions>(defaultFilter)
   const intervalRef = useRef<number | undefined>(undefined)
   const commitsRef = useRef(commits)
   const onCommitRef = useRef(onCommit)
+
+  // Filter commits based on filter options
+  const filteredCommits = useMemo(() => {
+    let result = commits
+
+    if (filter.search) {
+      const searchLower = filter.search.toLowerCase()
+      result = result.filter(c =>
+        c.message.toLowerCase().includes(searchLower) ||
+        c.author.toLowerCase().includes(searchLower) ||
+        c.hash.toLowerCase().includes(searchLower)
+      )
+    }
+
+    if (filter.authorType && filter.authorType !== 'all') {
+      result = result.filter(c => c.authorType === filter.authorType)
+    }
+
+    return result
+  }, [commits, filter])
+
+  // Handle filter change
+  const handleFilterChange = useCallback((newFilter: FilterOptions) => {
+    setFilter(newFilter)
+    setActiveIndex(0)
+    setIsPlaying(false)
+    onFilterChange?.(newFilter)
+  }, [onFilterChange])
 
   useEffect(() => {
     injectStyles()
@@ -371,7 +548,7 @@ export function Trace({
     intervalRef.current = window.setInterval(() => {
       setActiveIndex(i => {
         const next = i + 1
-        const maxIndex = commitsRef.current.length - 1
+        const maxIndex = filteredCommits.length - 1
         if (next >= maxIndex) {
           setIsPlaying(false)
           return maxIndex
@@ -385,13 +562,13 @@ export function Trace({
         clearInterval(intervalRef.current)
       }
     }
-  }, [isPlaying, interval])
+  }, [isPlaying, interval, filteredCommits.length])
 
   useEffect(() => {
-    if (commitsRef.current[activeIndex]) {
-      onCommitRef.current?.(commitsRef.current[activeIndex])
+    if (filteredCommits[activeIndex]) {
+      onCommitRef.current?.(filteredCommits[activeIndex])
     }
-  }, [activeIndex])
+  }, [activeIndex, filteredCommits])
 
   // Helper to navigate with View Transitions API (2026: native smooth transitions)
   const navigateToIndex = useCallback((newIndex: number) => {
@@ -416,8 +593,8 @@ export function Trace({
   }, [activeIndex, navigateToIndex])
 
   const handleNext = useCallback(() => {
-    navigateToIndex(Math.min(commitsRef.current.length - 1, activeIndex + 1))
-  }, [activeIndex, navigateToIndex])
+    navigateToIndex(Math.min(filteredCommits.length - 1, activeIndex + 1))
+  }, [activeIndex, navigateToIndex, filteredCommits.length])
 
   const togglePlay = useCallback(() => {
     setIsPlaying(v => !v)
@@ -451,10 +628,10 @@ export function Trace({
         break
       case 'End':
         e.preventDefault()
-        navigateToIndex(commitsRef.current.length - 1)
+        navigateToIndex(filteredCommits.length - 1)
         break
     }
-  }, [handlePrev, handleNext, togglePlay, navigateToIndex])
+  }, [handlePrev, handleNext, togglePlay, navigateToIndex, filteredCommits.length])
 
   if (commits.length === 0) {
     return (
@@ -464,8 +641,16 @@ export function Trace({
     )
   }
 
-  const activeCommit = commits[activeIndex]
-  const progressHeight = commits.length > 0 ? ((activeIndex + 1) / commits.length) * 100 : 0
+  if (filteredCommits.length === 0) {
+    return (
+      <div className={`trace-root ${className}`}>
+        <div className="trace-empty">no commits match your filter</div>
+      </div>
+    )
+  }
+
+  const activeCommit = filteredCommits[activeIndex]
+  const progressHeight = filteredCommits.length > 0 ? ((activeIndex + 1) / filteredCommits.length) * 100 : 0
 
   // Guard against out-of-bounds activeIndex (can happen with rapid navigation)
   if (!activeCommit) {
@@ -483,6 +668,15 @@ export function Trace({
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
+      {filterable && (
+        <FilterBar
+          filter={filter}
+          onFilterChange={handleFilterChange}
+          totalCount={commits.length}
+          filteredCount={filteredCommits.length}
+        />
+      )}
+
       <div className="trace-controls">
         <button className="trace-btn" onClick={handlePrev} disabled={activeIndex === 0}>
           prev
@@ -490,16 +684,16 @@ export function Trace({
         <button className="trace-btn" onClick={togglePlay}>
           {isPlaying ? 'pause' : 'play'}
         </button>
-        <button className="trace-btn" onClick={handleNext} disabled={activeIndex >= commits.length - 1}>
+        <button className="trace-btn" onClick={handleNext} disabled={activeIndex >= filteredCommits.length - 1}>
           next
         </button>
-        <span className="trace-info">{activeIndex + 1} / {commits.length}</span>
+        <span className="trace-info">{activeIndex + 1} / {filteredCommits.length}</span>
       </div>
 
       <div className="trace-container">
         <div className="trace-timeline">
           <div className="trace-progress" style={{ height: `${progressHeight}%` }} />
-          {commits.map((commit, index) => (
+          {filteredCommits.map((commit, index) => (
             <CommitItem
               key={commit.hash}
               commit={commit}
