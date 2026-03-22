@@ -1,6 +1,6 @@
 // Shared utilities for git adapters — parse diffs, detect AI authors, format dates
 
-import { DEFAULT_PATTERNS } from './config'
+import { DEFAULT_PATTERNS } from './patterns'
 import type { Commit } from './types'
 
 // Parse unified diff format into lines

@@ -3,6 +3,7 @@
 import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { homedir } from 'os'
+import { DEFAULT_PATTERNS } from './patterns'
 
 export interface TraceConfig {
   aiPatterns?: {
@@ -10,12 +11,6 @@ export interface TraceConfig {
     messages?: string[]
   }
   last?: number
-}
-
-// Default AI detection patterns — single source of truth
-export const DEFAULT_PATTERNS = {
-  emails: ['noreply@cursor.sh', 'claude@anthropic.com', 'bot@github.com', 'copilot', 'cursor'],
-  messages: ['Co-Authored-By: Claude', 'Co-Authored-By: Cursor', 'Generated-by:', '[skip-human-review]', 'AI-generated']
 }
 
 const DEFAULT: TraceConfig = {
