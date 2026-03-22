@@ -28,6 +28,15 @@ export type DiffLine = {
   content: string
 }
 
+export type AuthorTypeFilter = 'all' | 'human' | 'ai'
+
+export type FilterOptions = {
+  search?: string
+  authorType?: AuthorTypeFilter
+  dateFrom?: string
+  dateTo?: string
+}
+
 export type TraceProps = {
   commits?: Commit[]
   autoPlay?: boolean
@@ -35,6 +44,9 @@ export type TraceProps = {
   onCommit?: (commit: Commit) => void
   className?: string
   theme?: Theme
+  filterable?: boolean
+  defaultFilter?: FilterOptions
+  onFilterChange?: (filter: FilterOptions) => void
 }
 
 // GitHub API response types

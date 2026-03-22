@@ -3,4 +3,4 @@
 
 export { Trace } from './Trace'
 export { themes, themeToVars } from './themes'
-export type { Commit, DiffLine, TraceProps, Theme, ThemeColors } from './types'
+export type { Commit, DiffLine, TraceProps, Theme, ThemeColors, FilterOptions, AuthorTypeFilter } from './types'
