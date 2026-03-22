@@ -3,6 +3,26 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Git history visualizer for the AI coding era",
+  "author": "doanbactam",
+  "license": "MIT",
+  "keywords": [
+    "git",
+    "history",
+    "visualizer",
+    "ai",
+    "commits",
+    "diff",
+    "timeline",
+    "react"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doanbactam/trace.git"
+  },
+  "homepage": "https://github.com/doanbactam/trace#readme",
+  "bugs": {
+    "url": "https://github.com/doanbactam/trace/issues"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
