@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Trace } from 'trace'
 import { commits } from './mockData'
-import type { Theme } from 'trace'
+import type { Theme, FilterOptions } from 'trace'
 
 const THEMES: { value: Theme; label: string }[] = [
   { value: 'dark', label: 'Dark' },
@@ -16,6 +16,8 @@ export function App() {
   const [theme, setTheme] = useState<Theme>('dark')
   const [autoPlay, setAutoPlay] = useState(true)
   const [interval, setInterval] = useState(1500)
+  const [filterable, setFilterable] = useState(true)
+  const [filter, setFilter] = useState<FilterOptions>({})
 
   return (
     <div className="app">
@@ -24,6 +26,12 @@ export function App() {
           <span>Trace</span> Git History Visualizer
         </h1>
         <div className="app-controls">
+          <button
+            className="app-select"
+            onClick={() => setFilterable(!filterable)}
+          >
+            {filterable ? 'Filter: ON' : 'Filter: OFF'}
+          </button>
           <select
             className="app-select"
             value={theme}
@@ -50,6 +58,9 @@ export function App() {
           autoPlay={autoPlay}
           interval={interval}
           theme={theme}
+          filterable={filterable}
+          defaultFilter={filter}
+          onFilterChange={setFilter}
           onCommit={(commit) => {
             console.log('Viewing commit:', commit.message)
           }}
