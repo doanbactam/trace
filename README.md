@@ -1,4 +1,6 @@
 # trace
+<img width="1828" height="1350" alt="image" src="https://github.com/user-attachments/assets/12ff8e4e-6360-446a-9ad6-80b9efed700e" />
+
 
 Git history visualizer for the AI coding era.
 
